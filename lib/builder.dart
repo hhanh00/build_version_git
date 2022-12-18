@@ -62,7 +62,7 @@ Future<String?> gitCommitHash() async {
   if (!await GitDir.isGitDir(p.current)) return null;
 
   final gitDir = await GitDir.fromExisting(p.current);
-  final commit = await gitDir.commitFromRevision("HEAD");
-  final id = commit.treeSha.substring(0, 8);
+  final branch = await gitDir.currentBranch();
+  final id = branch.sha;
   return id;
 }
