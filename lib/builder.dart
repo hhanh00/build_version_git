@@ -11,6 +11,8 @@ import 'dart:async';
 
 import 'package:build/build.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
+import 'package:git/git.dart';
+import 'package:path/path.dart' as p;
 
 const _defaultOutput = 'lib/src/version.dart';
 
@@ -41,9 +43,12 @@ class _VersionBuilder implements Builder {
       throw StateError('pubspec.yaml does not have a version defined.');
     }
 
+    final id = await gitCommitHash() ?? '';
+
     await buildStep.writeAsString(buildStep.allowedOutputs.single, '''
 // Generated code. Do not modify.
 const packageVersion = '${pubspec.version}';
+const commitId = '$id';
 ''');
   }
 
@@ -51,4 +56,13 @@ const packageVersion = '${pubspec.version}';
   Map<String, List<String>> get buildExtensions => {
         'pubspec.yaml': [output],
       };
+}
+
+Future<String?> gitCommitHash() async {
+  if (!await GitDir.isGitDir(p.current)) return null;
+
+  final gitDir = await GitDir.fromExisting(p.current);
+  final commit = await gitDir.commitFromRevision("HEAD");
+  final id = commit.treeSha.substring(0, 8);
+  return id;
 }
