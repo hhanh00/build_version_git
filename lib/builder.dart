@@ -61,7 +61,7 @@ const commitId = '$id';
 Future<String?> gitCommitHash() async {
   if (!await GitDir.isGitDir(p.current)) return null;
 
-  final gitDir = await GitDir.fromExisting(p.current);
+  final gitDir = await GitDir.fromExisting(p.current, allowSubdirectory: true);
   final branch = await gitDir.currentBranch();
   final id = branch.sha;
   return id;
